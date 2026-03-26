@@ -1,0 +1,53 @@
+# conf/config.yml — single source of truth for all project settings
+
+project:
+  name: fraud-detection-system
+  version: "1.0.0"
+
+data:
+  raw_path: "/FileStore/fraud-detection/raw/creditcard.csv"
+  database: "fraud_db"
+  tables:
+    raw:   "transactions_raw"
+    train: "transactions_train"
+    test:  "transactions_test"
+    features: "features_train"
+    scored:   "scored_transactions"
+  train_ratio: 0.8
+  random_seed: 42
+
+features:
+  amount_bins: [0, 10, 50, 100, 500, 1000, 5000, 99999]
+  rolling_windows: [10, 50, 100]
+  time_buckets: 24
+
+model:
+  name: "fraud_xgboost"
+  experiment_name: "/fraud-detection/experiments"
+  params:
+    n_estimators: 300
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    eval_metric: "aucpr"
+  threshold: 0.5
+
+mlflow:
+  tracking_uri: "databricks"
+  registry_uri: "databricks"
+  model_alias:
+    staging:    "Staging"
+    production: "Production"
+
+streaming:
+  trigger_interval: "10 seconds"
+  checkpoint_path: "/FileStore/fraud-detection/checkpoints/"
+  output_table: "fraud_db.scored_transactions"
+
+monitoring:
+  drift_threshold: 0.1
+  performance_threshold:
+    min_auc_pr: 0.85
+    min_f1: 0.80
+  alert_email: "latha.rv@yahoo.com"
