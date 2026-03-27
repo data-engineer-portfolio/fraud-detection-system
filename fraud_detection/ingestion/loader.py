@@ -25,12 +25,12 @@ class DataLoader:
     """
 
     DOWNLOAD_URL = (
-        "https://raw.githubusercontent.com/"
-        "dsrscientist/dataset1/master/creditcard.csv"
+    "https://storage.googleapis.com/"
+    "download.tensorflow.org/data/creditcard.csv"
     )
     BACKUP_URL = (
-        "https://storage.googleapis.com/"
-        "download.tensorflow.org/data/creditcard.csv"
+    "https://datahub.io/machine-learning/creditcard/"
+    "r/creditcard.csv"
     )
     LOCAL_TMP = "/tmp/fraud-detection/"
     MIN_FILE_SIZE_MB = 100
