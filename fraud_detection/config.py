@@ -1,17 +1,30 @@
 # fraud_detection/config.py
 import yaml
-from dataclasses import dataclass, field
-from typing import Dict, List, Any
-from pathlib import Path
+from dataclasses import dataclass
+from typing import Dict, Any
 
 
 @dataclass
 class DataConfig:
-    raw_path: str
+    catalog: str
     database: str
     tables: Dict[str, str]
     train_ratio: float
     random_seed: int
+
+    def full_table(self, key: str) -> str:
+        """
+        Return fully qualified 3-level Unity Catalog table name.
+        e.g. full_table("train") -> "workspace.fraud_db.transactions_train"
+        """
+        return f"{self.catalog}.{self.database}.{self.tables[key]}"
+
+    def full_database(self) -> str:
+        """
+        Return fully qualified catalog.database string.
+        e.g. "workspace.fraud_db"
+        """
+        return f"{self.catalog}.{self.database}"
 
 
 @dataclass
@@ -62,6 +75,8 @@ class ProjectConfig:
 
     def __repr__(self):
         return (
-            f"ProjectConfig(project={self.project_name} v{self.version}, "
-            f"db={self.data.database}, model={self.model.name})"
+            f"ProjectConfig("
+            f"project={self.project_name} v{self.version}, "
+            f"db={self.data.full_database()}, "
+            f"model={self.model.name})"
         )
