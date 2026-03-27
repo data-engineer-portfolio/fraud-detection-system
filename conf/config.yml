@@ -5,12 +5,12 @@ project:
   version: "1.0.0"
 
 data:
-  raw_path: "/FileStore/fraud-detection/raw/creditcard.csv"
+  catalog: "workspace"
   database: "fraud_db"
   tables:
-    raw:   "transactions_raw"
-    train: "transactions_train"
-    test:  "transactions_test"
+    raw:      "transactions_raw"
+    train:    "transactions_train"
+    test:     "transactions_test"
     features: "features_train"
     scored:   "scored_transactions"
   train_ratio: 0.8
@@ -42,8 +42,8 @@ mlflow:
 
 streaming:
   trigger_interval: "10 seconds"
-  checkpoint_path: "/FileStore/fraud-detection/checkpoints/"
-  output_table: "fraud_db.scored_transactions"
+  checkpoint_path: "/tmp/fraud-detection/checkpoints/"
+  output_table: "workspace.fraud_db.scored_transactions"
 
 monitoring:
   drift_threshold: 0.1
