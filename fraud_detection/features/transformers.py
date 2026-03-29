@@ -80,20 +80,6 @@ class AmountTransformer:
             "✓ Amount features: amount_log, amount_zscore, "
             "amount_bin, amount_is_round, amount_percentile")
         return df
-    
-# This is what the chain means step by step:
-df1 = df.withColumn("amount_log", log1p(col("Amount")))
-df2 = df1.withColumn("amount_zscore", ...)
-df3 = df2.withColumn("amount_bin", ...)
-# etc.
-
-# The chained version does the exact same thing, just cleaner to read
-df = (
-    df
-    .withColumn("amount_log", ...)
-    .withColumn("amount_zscore", ...)
-    .withColumn("amount_bin", ...)
-)
 
 class TimeTransformer:
     """
