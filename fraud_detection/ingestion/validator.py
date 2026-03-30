@@ -114,7 +114,7 @@ class DataValidator:
         if "Amount" not in self.df.columns:
             return self
 
-        neg_count = self.df.filter(col("Amount") < 0).count()
+        neg_count = self.df.filter("Amount < 0").count()
         if neg_count > 0:
             self.issues.append(
                 f"Found {neg_count:,} rows with negative Amount values"
