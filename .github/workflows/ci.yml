@@ -22,17 +22,17 @@ jobs:
       - name: Install dependencies
         run: |
           pip install pyyaml pytest pytest-cov
+          pip install -e .
 
       - name: Run unit tests
         run: |
           pytest tests/ -v \
             --cov=fraud_detection \
-            --cov-report=term-missing \
-            --ignore=tests/integration
+            --cov-report=term-missing
 
       - name: Confirm imports work
         run: |
           python -c "
           from fraud_detection.config import ProjectConfig
-          print('✓ config imports')
+          print('✓ config imports cleanly')
           "
