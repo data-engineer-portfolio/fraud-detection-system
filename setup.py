@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 setup(
     name="fraud-detection-system",
     version="1.0.0",
-    author="Your Name",
+    author="Vidyullatha Polavarapu",
     description="Production-grade real-time fraud detection on Databricks",
     packages=find_packages(),
     python_requires=">=3.9",
