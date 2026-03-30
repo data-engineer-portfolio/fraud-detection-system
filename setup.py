@@ -9,13 +9,9 @@ setup(
     packages=find_packages(),
     python_requires=">=3.9",
     install_requires=[
+        # Only what the core package needs to import cleanly
+        # Heavy ML deps (xgboost, mlflow, pyspark) live in
+        # requirements.txt and are installed on Databricks directly
         "pyyaml>=6.0",
-        "xgboost>=1.7",
-        "lightgbm>=3.3",
-        "scikit-learn>=1.2",
-        "mlflow>=2.0",
-        "imbalanced-learn>=0.10",
-        "pandas>=1.5",
-        "numpy>=1.23",
     ],
 )
