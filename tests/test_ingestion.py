@@ -43,6 +43,13 @@ def make_mock_df(
     df.columns = columns
     df.count.return_value = row_count
 
+    # Mock filter — returns a new mock whose count()
+    # gives the right value based on has_negatives flag
+    # This works regardless of what expression is passed to filter()
+    filter_mock = MagicMock()
+    filter_mock.count.return_value = 10 if has_negatives else 0
+    df.filter.return_value = filter_mock
+
     # Mock null check — return zero nulls by default
     null_row = MagicMock()
     null_row.asDict.return_value = {
@@ -51,12 +58,7 @@ def make_mock_df(
     }
     df.select.return_value.collect.return_value = [null_row]
 
-    # Mock negative amount check
-    df.filter.return_value.count.return_value = (
-        10 if has_negatives else 0
-    )
-
-    # Mock distinct class values
+    # Mock distinct class values for check_class_labels
     mock_class_0 = MagicMock()
     mock_class_0.__getitem__ = lambda self, k: 0
     mock_class_1 = MagicMock()
