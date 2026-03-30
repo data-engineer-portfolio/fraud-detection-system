@@ -1,0 +1,120 @@
+# conf/logging.yml
+# Central logging configuration for fraud detection system
+# Controls what gets logged, at what level, and where it goes
+
+version: 1
+disable_existing_loggers: false
+
+# ─── Formatters ───────────────────────────────────────────
+# Define how log messages look
+formatters:
+
+  standard:
+    # Full format for file logs — includes module name
+    format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+  notebook:
+    # Cleaner format for notebook output — no module name clutter
+    format: "%(asctime)s | %(levelname)-8s | %(message)s"
+    datefmt: "%H:%M:%S"
+
+  minimal:
+    # One-liner for quick debugging
+    format: "%(levelname)s | %(message)s"
+
+# ─── Handlers ─────────────────────────────────────────────
+# Define WHERE logs go
+handlers:
+
+  console:
+    # Prints to notebook/terminal output
+    class: logging.StreamHandler
+    level: INFO
+    formatter: notebook
+    stream: ext://sys.stdout
+
+  file_all:
+    # Writes ALL logs to a file — info and above
+    class: logging.FileHandler
+    level: INFO
+    formatter: standard
+    filename: /tmp/fraud_detection/logs/pipeline.log
+    mode: a                    # append — don't overwrite each run
+    encoding: utf-8
+
+  file_errors:
+    # Writes ONLY errors and warnings to separate file
+    # This is what you check first when something goes wrong
+    class: logging.FileHandler
+    level: WARNING
+    formatter: standard
+    filename: /tmp/fraud_detection/logs/errors.log
+    mode: a
+    encoding: utf-8
+
+# ─── Loggers ──────────────────────────────────────────────
+# Define logging level per module
+loggers:
+
+  fraud_detection:
+    # Our application code — show INFO and above
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  fraud_detection.ingestion:
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  fraud_detection.features:
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  fraud_detection.training:
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  fraud_detection.serving:
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  fraud_detection.monitoring:
+    level: INFO
+    handlers: [console, file_all, file_errors]
+    propagate: false
+
+  # ─── Third party noise suppression ───────────────────────
+  # These libraries are very chatty — suppress their warnings
+
+  py4j:
+    # Spark's Java bridge — extremely noisy, we don't care
+    level: ERROR
+    handlers: [file_errors]
+    propagate: false
+
+  pyspark:
+    # Spark Python layer — suppress info spam
+    level: WARNING
+    handlers: [file_errors]
+    propagate: false
+
+  urllib3:
+    level: WARNING
+    handlers: []
+    propagate: false
+
+  requests:
+    level: WARNING
+    handlers: []
+    propagate: false
+
+# ─── Root logger ──────────────────────────────────────────
+# Catches anything not matched above
+root:
+  level: WARNING
+  handlers: [console]
