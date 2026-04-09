@@ -23,7 +23,7 @@ features:
 
 model:
   name: "fraud_xgboost"
-  experiment_name: "/fraud-detection/experiments"
+  experiment_name: "/Users/latha_rv.ai@yahoo.com/fraud-detection-system/fraud_detection/experiments"
   params:
     n_estimators: 300
     max_depth: 6
@@ -42,7 +42,7 @@ mlflow:
 
 streaming:
   trigger_interval: "10 seconds"
-  checkpoint_path: "/tmp/fraud-detection/checkpoints/"
+  checkpoint_path: "/Users/latha_rv.ai@yahoo.com/fraud-detection-system/fraud_detection/checkpoints/"
   output_table: "workspace.fraud_db.scored_transactions"
 
 monitoring:
