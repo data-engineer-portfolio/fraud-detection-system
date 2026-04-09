@@ -395,88 +395,75 @@ class FraudModelTrainer:
         return result
 
     def _register_best_model(
-    self,
-    winner: EvaluationResult,
-) -> None:
-    """
-    Register the winning model in MLflow Model Registry.
-    Uses the new MLflow API (name instead of artifact_path).
-    """
-    logger.info(
-        f"Registering {winner.model_name} "
-        f"in MLflow Model Registry..."
-    )
+        self,
+        winner: EvaluationResult,
+    ) -> None:
+        """
+        Register the winning model in MLflow Model Registry.
 
-    model_name = self.config.model.name
-    client     = mlflow.tracking.MlflowClient()
-
-    # Find the most recent run for the winning model
-    experiment = mlflow.get_experiment_by_name(
-        self.config.model.experiment_name
-    )
-
-    if experiment is None:
-        logger.warning(
-            "Experiment not found — skipping registration"
+        Model moves through: None → Staging → Production
+        In Phase 4 we'll add the Staging → Production promotion
+        with additional validation gates.
+        """
+        logger.info(
+            f"Registering {winner.model_name} "
+            f"in MLflow Model Registry..."
         )
-        return
 
-    run_name = winner.model_name.lower()
-    runs = client.search_runs(
-        experiment_ids=[experiment.experiment_id],
-        filter_string=(
-            f"tags.mlflow.runName = '{run_name}'"
-        ),
-        order_by=["start_time DESC"],
-        max_results=1,
-    )
+        model_name = self.config.model.name
 
-    if not runs:
-        logger.warning(
-            f"No runs found for {run_name} — "
-            f"skipping registration"
-        )
-        return
+        # Find the run that produced the winning model
+        experiment=mlflow.get_experiment_by_name(self.config.model.experiment_name)
+        client = mlflow.tracking.MlflowClient()
+        if experiment is None:
+            logger.warning("Experiment not found-skipping registration")
+            return
+        
+        run_name = winner.model_name.lower()
 
-    run_id = runs[0].info.run_id
-    logger.info(f"Found run: {run_id}")
-
-    # List artifacts to find the correct model path
-    # New MLflow API uses 'name' not 'artifact_path'
-    artifacts = client.list_artifacts(run_id)
-    logger.info(
-        f"Artifacts in run: "
-        f"{[a.path for a in artifacts]}"
-    )
-
-    # Find model artifact — try common paths
-    model_path = None
-    for candidate in [
-        run_name,          # e.g. "xgboost"
-        "model",           # default MLflow path
-        winner.model_name, # e.g. "XGBoost"
-    ]:
-        matching = [
-            a for a in artifacts
-            if a.path == candidate and a.is_dir
-        ]
-        if matching:
-            model_path = candidate
-            break
-
-    if model_path is None:
-        # Fallback — use first directory artifact found
-        dirs = [a for a in artifacts if a.is_dir]
-        if dirs:
-            model_path = dirs[0].path
-            logger.info(
-                f"Using first artifact directory: {model_path}"
-            )
-        else:
+        runs = client.search_runs(
+            experiment_ids=[experiment.experiment_id],
+            filter_string=(f"tags.mlflow.runName='{run_name}'"),
+            order_by=["metrics.aucPR desc"],
+            max_results=1,
+        )    
+        if not runs:
             logger.warning(
-                "No model artifact found — skipping registration"
+                f"No runs found for {run_name} — "
+                f"skipping registration"
             )
             return
+
+        run_id   = runs[0].info.run_id
+        logger.info(f"Found run: {run_id}")
+        artifacts = client.list_artifacts(run_id)
+            logger.info(
+                f"Artifacts in run: "
+                f"{[a.path for a in artifacts]}"
+            )
+        model_path=None
+        for candidate in [run_name,"model",winner.model_name]:
+            matching = [
+            a for a in artifacts
+            if a.path == candidate and a.is_dir
+            ]
+            if matching:
+                model_path = candidate
+                break
+
+        if model_path is None:
+            # Fallback — use first directory artifact found
+            dirs = [a for a in artifacts if a.is_dir]
+            if dirs:
+                model_path = dirs[0].path
+                logger.info(
+                    f"Using first artifact directory: {model_path}"
+                )
+        else:
+                logger.warning(
+                    "No model artifact found — skipping registration"
+                )
+                return
 
     model_uri = f"runs:/{run_id}/{model_path}"
     logger.info(f"Registering from URI: {model_uri}")
